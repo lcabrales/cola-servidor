@@ -200,28 +200,28 @@
                     android:maxLength="6" />
             </LinearLayout>
 
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/btn_clean"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/ripple_rounded"
-                android:text="Limpiar Parámetros"
-                android:textColor="@color/white"
-                app:backgroundTint="@color/color_primary_dark" />
-
             <Button
                 android:id="@+id/btn_start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="40dp"
                 android:layout_marginRight="40dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/ripple_rounded"
                 android:text="Empezar Simulación"
                 android:textColor="@color/white" />
+
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/btn_clean"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/ripple_rounded"
+                android:text="Limpiar Parámetros"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/color_primary_dark" />
         </LinearLayout>
     </ScrollView>
 

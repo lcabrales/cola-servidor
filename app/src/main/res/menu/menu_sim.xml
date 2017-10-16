@@ -3,6 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action"
-        android:title="Empezar"
+        android:title="Detener"
         app:showAsAction="always" />
 </menu>

@@ -31,13 +31,14 @@ public class SimActivity extends AppCompatActivity {
     private RandomGenerator mQueueRandom, mServerRandom;
     private ArrayList<Integer> mQueueValues, mServerValues, mArrivalTimes, mStartTimes, mEndTimes,
             mWaitTimes, mServerWaitTimes, mQueueSizes, mTotalTimes;
-    private boolean isActive = false;
+    private boolean isActive = true;
     private int countTotal;
     private CountDownTimer mTimer;
     private AlertDialogHelper mAlertDialog;
     private int countQueue;
     private TimeUnit mTimeUnit;
     private Animation mQueueAnimation, mServerAnimation;
+    private android.view.Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,7 @@ public class SimActivity extends AppCompatActivity {
 
         setupToolbar();
 
+        setOnClickListeners();
         prepSimulation();
     }
 
@@ -60,9 +62,21 @@ public class SimActivity extends AppCompatActivity {
         }
     }
 
+    private void setOnClickListeners() {
+        findViewById(R.id.btn_stop).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopSimulation();
+            }
+        });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(android.view.Menu menu) {
         getMenuInflater().inflate(R.menu.menu_sim, menu);
+        mMenu = menu;
+
+        startSimulation();
         return true;
     }
 
@@ -76,41 +90,9 @@ public class SimActivity extends AppCompatActivity {
             if (id == R.id.action) {
                 //START OR STOP SIMULATION
                 if (!isActive) {
-                    isActive = true;
-                    item.setTitle("Detener");
                     startSimulation();
                 } else {
-                    isActive = false;
-                    mTimer.cancel();
-                    item.setTitle("Empezar");
-                    item.setEnabled(false);
-
-                    findViewById(R.id.view_queue).clearAnimation();
-                    findViewById(R.id.view_server).clearAnimation();
-                    findViewById(R.id.view_queue).setVisibility(View.GONE);
-
-                    Results results = new Results();
-                    results.averageWaitTime = String.valueOf(String.format(Locale.US, "%.2f", getMean(mWaitTimes)));
-                    double queueProbability = getQueueProbability(countQueue, countTotal);
-                    results.queueProbability = String.valueOf(String.format(Locale.US, "%.2f", queueProbability));
-                    results.averageQueueLenght = String.valueOf(String.format(Locale.US, "%.2f", getMean(mQueueSizes)));
-                    results.maxQueueLenght = String.valueOf(getMinMax(mQueueSizes).second);
-                    results.averageTotalTime = String.valueOf(String.format(Locale.US, "%.2f", getMean(mTotalTimes)));
-                    results.queueLenght = String.valueOf(mQueueSizes.get(mQueueSizes.size() - 1));
-                    results.totalQty = String.valueOf(countTotal);
-                    results.maxWaitTime = String.valueOf(getMinMax(mWaitTimes).second);
-
-                    //ENVIA LOS RESULTADOS DE LA SIMULACION A LA OTRA PANTALLA
-                    Intent intent = new Intent(mContext, ResultsActivity.class);
-                    intent.putExtra(SimParams.QUEUE_KEY, mQueueParams);
-                    intent.putExtra(SimParams.SERVER_KEY, mServerParams);
-                    intent.putExtra(Results.KEY, results);
-                    intent.putExtra(TimeUnit.KEY, mTimeUnit);
-                    mAlertDialog.showWithIntent(
-                            "Simulación Finalizada",
-                            "La simulación ha concluido con éxito, proceda a ver los resultados.",
-                            intent
-                    );
+                    stopSimulation();
                 }
             }
         }
@@ -162,8 +144,46 @@ public class SimActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tv_wait_time)).setText(waitTime);
     }
 
+    //DETENER SIMULACIÓN
+    private void stopSimulation() {
+        isActive = false;
+        mTimer.cancel();
+        mMenu.findItem(R.id.action).setTitle("Empezar");
+        mMenu.findItem(R.id.action).setEnabled(false);
+
+        findViewById(R.id.view_queue).clearAnimation();
+        findViewById(R.id.view_server).clearAnimation();
+        findViewById(R.id.view_queue).setVisibility(View.GONE);
+
+        Results results = new Results();
+        results.averageWaitTime = String.valueOf(String.format(Locale.US, "%.2f", getMean(mWaitTimes)));
+        double queueProbability = getQueueProbability(countQueue, countTotal);
+        results.queueProbability = String.valueOf(String.format(Locale.US, "%.2f", queueProbability));
+        results.averageQueueLenght = String.valueOf(String.format(Locale.US, "%.2f", getMean(mQueueSizes)));
+        results.maxQueueLenght = String.valueOf(getMinMax(mQueueSizes).second);
+        results.averageTotalTime = String.valueOf(String.format(Locale.US, "%.2f", getMean(mTotalTimes)));
+        results.queueLenght = String.valueOf(mQueueSizes.get(mQueueSizes.size() - 1));
+        results.totalQty = String.valueOf(countTotal);
+        results.maxWaitTime = String.valueOf(getMinMax(mWaitTimes).second);
+
+        //ENVIA LOS RESULTADOS DE LA SIMULACION A LA OTRA PANTALLA
+        Intent intent = new Intent(mContext, ResultsActivity.class);
+        intent.putExtra(SimParams.QUEUE_KEY, mQueueParams);
+        intent.putExtra(SimParams.SERVER_KEY, mServerParams);
+        intent.putExtra(Results.KEY, results);
+        intent.putExtra(TimeUnit.KEY, mTimeUnit);
+        mAlertDialog.showWithIntent(
+                "Simulación Finalizada",
+                "La simulación ha concluido con éxito, proceda a ver los resultados.",
+                intent
+        );
+    }
+
     //INICIA LA SIMULACION
     private void startSimulation() {
+        isActive = true;
+        mMenu.findItem(R.id.action).setTitle("Detener");
+
         findViewById(R.id.view_queue).setVisibility(View.VISIBLE);
 
         countTotal = 0;
@@ -222,7 +242,7 @@ public class SimActivity extends AppCompatActivity {
         if (mArrivalTimes.size() == 0)
             arrivalTime = mQueueValues.get(0);
         else {
-            arrivalTime = mQueueValues.get(i) + mQueueValues.get(i - 1);
+            arrivalTime = mQueueValues.get(i) + mArrivalTimes.get(i - 1);
         }
 
         mArrivalTimes.add(arrivalTime);
@@ -282,11 +302,11 @@ public class SimActivity extends AppCompatActivity {
             queueSize = 0;
 
             int currentArrivalTime = mArrivalTimes.get(i);
-            if (currentArrivalTime <= mEndTimes.get(i - 1))
-                queueSize++;
+            /*if (currentArrivalTime <= mEndTimes.get(i - 1))
+                queueSize++;*/
 
-            for (int j = mArrivalTimes.size() - 1; j > 0; j--) {
-                if (mArrivalTimes.get(j) <= mEndTimes.get(j - 1) && currentArrivalTime <= mEndTimes.get(j - 1))
+            for (int j = mEndTimes.size() - 1; j > 0; j--) {
+                if (currentArrivalTime <= mEndTimes.get(j))
                     queueSize++;
             }
         }

@@ -179,6 +179,17 @@
                         android:id="@+id/ll_wait_time"
                         layout="@layout/layout_statistics" />
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_stop"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    android:layout_marginTop="30dp"
+                    android:background="@drawable/ripple_rounded"
+                    android:text="Detener Simulación"
+                    android:textColor="@color/white" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
